@@ -1,7 +1,7 @@
 const express = require("express");
 const authenticateUser = require("../middleware/authMiddleware");
 const User = require('../models/User');
-const Job = require('../models/JobScheme');
+const Job = require('../models/JobScheme'); // Changed from jobScheme to JobScheme
 const GovtBenefit = require('../models/govtBenefit');
 const Subsidy = require('../models/Subsidy');
 
