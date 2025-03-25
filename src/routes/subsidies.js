@@ -1,5 +1,5 @@
 const express = require("express");
-const Subsidy = require("../models/Subsidy");
+const Subsidy = require("../models/subsidy");
 const authenticateAdmin = require("../middleware/roleMiddleware");
 const authenticateUser = require("../middleware/authMiddleware");
 const User = require("../models/User");
