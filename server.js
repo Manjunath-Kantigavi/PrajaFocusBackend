@@ -52,6 +52,12 @@ app.use('/api', paymentRoutes);
 const subscriberRoutes = require("./src/routes/subscriberRoutes");
 app.use("/api/subscribers", subscriberRoutes); // Add this line to mount the routes
 
+
+// WhatsApp Webhook Route
+app.post('/webhook/whatsapp', express.json(), (req, res) => {
+  console.log("🔔 WhatsApp Webhook Received:", req.body);
+  res.sendStatus(200); // Respond to UltraMsg
+})
 // Start Server
 const PORT = process.env.PORT || 5008;
 app.listen(PORT, () => {
