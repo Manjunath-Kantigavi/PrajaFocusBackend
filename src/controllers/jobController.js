@@ -4,10 +4,10 @@ const sendWhatsAppMessage = require('../services/whatsappService');
 
 exports.createJob = async (req, res) => {
     try {
-        // Create the job
         const job = await Job.create(req.body);
+        console.log("Job created:", job._id);
 
-        // Find all subscribed users
+        // Find subscribers
         const subscribers = await User.find({ 
             jobAlertSubscription: true,
             $or: [
@@ -15,23 +15,18 @@ exports.createJob = async (req, res) => {
                 { subscriptionExpiresAt: null }
             ]
         });
+        console.log(`Found ${subscribers.length} active subscribers`);
 
-        console.log(`Found ${subscribers.length} subscribers to notify`);
-
-        // Prepare WhatsApp message
-        const message = `🚀 *New Job Alert* 🚀\n\n` +
-            `*${job.title}*\n` +
-            `📝 *Description:* ${job.description}\n` +
-            `🎯 *Eligibility:* ${job.eligibility}\n` +
-            `🔗 *Apply Here:* ${job.applicationLink}`;
-
-        // Send WhatsApp messages to all subscribers
+        // Send notifications
         for (const user of subscribers) {
             try {
+                const message = `🚀 *New Job Alert* 🚀\n\n*${job.title}*\n📝 *Description:* ${job.description}\n🎯 *Eligibility:* ${job.eligibility}\n🔗 *Apply Here:* ${job.applicationLink}`;
+                
+                console.log(`Sending notification to ${user.phone}`);
                 await sendWhatsAppMessage(user.phone, message);
-                console.log(`Notification sent to: ${user.phone}`);
+                console.log(`✅ Notification sent to ${user.phone}`);
             } catch (error) {
-                console.error(`Failed to send notification to ${user.phone}:`, error);
+                console.error(`Failed to notify ${user.phone}:`, error);
             }
         }
 
@@ -41,12 +36,8 @@ exports.createJob = async (req, res) => {
             subscribersNotified: subscribers.length,
             job: job
         });
-
     } catch (error) {
-        console.error('Error creating job:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message 
-        });
+        console.error('Error:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
