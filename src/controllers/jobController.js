@@ -27,7 +27,15 @@ exports.createJob = async (req, res) => {
         // Send notifications
         for (const user of subscribers) {
             try {
-                const message = `🚀 *New Job Alert* 🚀\n\n*${job.title}*\n📝 *Description:* ${job.description}\n🎯 *Eligibility:* ${job.eligibility}\n🔗 *Apply Here:* ${job.applicationLink}`;
+                const message = `🎯 *Job Alert from PrajaFocus* 🎯\n\n` +
+                    `*${job.title}*\n\n` +
+                    `📋 *Description:*\n${job.description}\n\n` +
+                    `✅ *Eligibility:*\n${job.eligibility}\n\n` +
+                    `🔗 *How to Apply:*\n${job.applicationLink}\n\n` +
+                    `--------------------------------\n` +
+                    `Best Regards,\n` +
+                    `Team PrajaFocus 🌟\n` +
+                    `Your Gateway to Government Opportunities`;
                 
                 console.log(`📤 Sending notification to ${user.name} (${user.phone})`);
                 await sendWhatsAppMessage(user.phone, message);
