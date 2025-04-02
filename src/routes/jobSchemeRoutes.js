@@ -3,6 +3,7 @@ const authenticateUser = require("../middleware/authMiddleware");
 const authenticateAdmin = require("../middleware/roleMiddleware");
 const JobScheme = require("../models/JobScheme");
 const User = require("../models/User");
+const { createJob } = require('../controllers/jobController'); // Add this line
 
 const router = express.Router();
 
@@ -56,16 +57,7 @@ router.get("/:id", authenticateAdmin, async (req, res) => {
 
 
 // Admin: Add a new job scheme
-router.post("/", authenticateAdmin, async (req, res) => {
-    const { title, description, eligibility, applicationLink } = req.body;
-    try {
-        const newScheme = new JobScheme({ title, description, eligibility, applicationLink });
-        await newScheme.save();
-        res.status(201).json({ message: "Job scheme added", jobScheme: newScheme });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error });
-    }
-});
+router.post("/", authenticateAdmin, createJob);
 
 // Admin: Update a job scheme
 router.put("/:id", authenticateAdmin, async (req, res) => {

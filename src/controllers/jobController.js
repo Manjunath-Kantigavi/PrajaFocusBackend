@@ -5,28 +5,35 @@ const sendWhatsAppMessage = require('../services/whatsappService');
 exports.createJob = async (req, res) => {
     try {
         const job = await Job.create(req.body);
-        console.log("Job created:", job._id);
+        console.log("📝 New Job Created:", job.title);
 
-        // Find subscribers
+        // Find subscribers with detailed logging
+        console.log("🔍 Finding subscribed users...");
         const subscribers = await User.find({ 
             jobAlertSubscription: true,
             $or: [
                 { subscriptionExpiresAt: { $gt: new Date() } },
                 { subscriptionExpiresAt: null }
             ]
-        });
-        console.log(`Found ${subscribers.length} active subscribers`);
+        }).select('name phone jobAlertSubscription subscriptionExpiresAt');
+
+        console.log("📱 Found subscribers:", subscribers.map(s => ({
+            name: s.name,
+            phone: s.phone,
+            subscriptionActive: s.jobAlertSubscription,
+            expiresAt: s.subscriptionExpiresAt
+        })));
 
         // Send notifications
         for (const user of subscribers) {
             try {
                 const message = `🚀 *New Job Alert* 🚀\n\n*${job.title}*\n📝 *Description:* ${job.description}\n🎯 *Eligibility:* ${job.eligibility}\n🔗 *Apply Here:* ${job.applicationLink}`;
                 
-                console.log(`Sending notification to ${user.phone}`);
+                console.log(`📤 Sending notification to ${user.name} (${user.phone})`);
                 await sendWhatsAppMessage(user.phone, message);
-                console.log(`✅ Notification sent to ${user.phone}`);
+                console.log(`✅ Notification sent successfully to ${user.phone}`);
             } catch (error) {
-                console.error(`Failed to notify ${user.phone}:`, error);
+                console.error(`❌ Failed to notify ${user.phone}:`, error);
             }
         }
 
