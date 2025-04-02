@@ -1,21 +1,22 @@
 const https = require('https');
 require('dotenv').config();
 
-const sendWhatsAppMessage = async (phone, message) => {
+const sendWhatsAppMessage = async (phone, message, retry = true) => {
     return new Promise((resolve, reject) => {
-        const formattedPhone = phone.replace('+', '').trim();
-        const finalPhone = formattedPhone.startsWith('91') ? formattedPhone : `91${formattedPhone}`;
+        let formattedPhone = phone.replace(/\D/g, '').trim();
+        if (!formattedPhone.startsWith('91')) {
+            formattedPhone = `91${formattedPhone}`;
+        }
 
         const data = JSON.stringify({
             token: process.env.ULTRAMSG_API_TOKEN,
-            to: finalPhone,
+            to: formattedPhone,
             body: message,
             priority: 10,
             type: 'chat'
         });
 
-        // Parse the API URL from env
-        const apiUrl = new URL(`${process.env.ULTRAMSG_API_URL}/messages/chat`);
+        const apiUrl = new URL(process.env.ULTRAMSG_API_URL);
 
         const options = {
             hostname: apiUrl.hostname,
@@ -23,7 +24,7 @@ const sendWhatsAppMessage = async (phone, message) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length': data.length,
+                'Content-Length': Buffer.byteLength(data),
                 'Accept': 'application/json'
             },
             timeout: 10000
@@ -37,19 +38,32 @@ const sendWhatsAppMessage = async (phone, message) => {
             });
 
             res.on('end', () => {
-                console.log(`📱 Attempting to send to ${finalPhone}`);
-                if (res.statusCode === 200) {
-                    console.log(`✅ Message sent to ${finalPhone}`);
-                    resolve({ success: true, phone: finalPhone });
+                console.log(`📱 Attempting to send to ${formattedPhone}`);
+
+                let jsonResponse;
+                try {
+                    jsonResponse = JSON.parse(responseData);
+                } catch (e) {
+                    console.log(`⚠️ Invalid JSON response for ${formattedPhone}:`, responseData);
+                    return resolve({ success: false, phone: formattedPhone, error: 'Invalid JSON response' });
+                }
+
+                if (res.statusCode === 200 && !jsonResponse.error) {
+                    console.log(`✅ Message sent to ${formattedPhone}`);
+                    resolve({ success: true, phone: formattedPhone });
                 } else {
-                    console.log(`⚠️ Response for ${finalPhone}:`, responseData);
-                    resolve({ success: false, phone: finalPhone, error: 'API Error' });
+                    console.log(`⚠️ API Error for ${formattedPhone}:`, jsonResponse.error || responseData);
+                    if (retry) {
+                        console.log(`🔄 Retrying for ${formattedPhone}...`);
+                        return resolve(sendWhatsAppMessage(phone, message, false));
+                    }
+                    resolve({ success: false, phone: formattedPhone, error: jsonResponse.error || 'API Error' });
                 }
             });
         });
 
         req.on('error', (error) => {
-            console.error(`❌ Error sending to ${finalPhone}:`, error.message);
+            console.error(`❌ Error sending to ${formattedPhone}:`, error.message);
             reject(error);
         });
 
@@ -57,5 +71,3 @@ const sendWhatsAppMessage = async (phone, message) => {
         req.end();
     });
 };
-
-module.exports = sendWhatsAppMessage;
