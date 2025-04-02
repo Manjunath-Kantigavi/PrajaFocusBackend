@@ -1,10 +1,10 @@
-const Job = require('../models/Job');
+const JobScheme = require('../models/JobScheme');
 const User = require('../models/User');
 const sendWhatsAppMessage = require('../services/whatsappService');
 
 exports.createJob = async (req, res) => {
     try {
-        const job = await Job.create(req.body);
+        const job = await JobScheme.create(req.body);
         console.log("📝 New Job Created:", job.title);
 
         // Find subscribers with detailed logging
