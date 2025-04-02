@@ -1,7 +1,7 @@
 const https = require('https');
 require('dotenv').config();
 
-const sendWhatsAppMessage = async (phone, message, retry = true) => {
+module.exports = async function sendWhatsAppMessage (phone, message, retry = true)  {
     return new Promise((resolve, reject) => {
         let formattedPhone = phone.replace(/\D/g, '').trim();
         if (!formattedPhone.startsWith('91')) {
