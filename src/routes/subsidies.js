@@ -3,22 +3,13 @@ const Subsidy = require("../models/subsidy");
 const authenticateAdmin = require("../middleware/roleMiddleware");
 const authenticateUser = require("../middleware/authMiddleware");
 const User = require("../models/User");
+const subsidyController = require("../controllers/subsidyController");
 
 const router = express.Router();
 
 // ✅ Add a new subsidy (Admin only)
-router.post("/", authenticateAdmin, async (req, res) => {
-    const { name, department, description, moreDetailsLink } = req.body;
+router.post("/", authenticateAdmin, subsidyController.createSubsidy);
 
-    try {
-        const newSubsidy = new Subsidy({ name, department, description, moreDetailsLink });
-        await newSubsidy.save();
-
-        res.status(201).json({ message: "Subsidy added successfully", subsidy: newSubsidy });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error });
-    }
-});
 
 // ✅ Get all subsidies
 router.get("/", authenticateUser, async (req, res) => {

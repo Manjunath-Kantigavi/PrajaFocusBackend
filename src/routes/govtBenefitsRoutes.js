@@ -3,6 +3,7 @@ const authenticateUser = require("../middleware/authMiddleware");
 const authenticateAdmin = require("../middleware/roleMiddleware");
 const GovtBenefit = require("../models/govtBenefit");
 const User = require("../models/User");
+const govtBenefitController = require("../controllers/govtBenefitController");
 
 const router = express.Router();
 
@@ -61,34 +62,7 @@ router.get("/:id", authenticateAdmin, async (req, res) => {
 
 
 // Admin: Add a new government benefit
-router.post("/", authenticateAdmin, async (req, res) => {
-    try {
-        const { title, department, description, eligibility, applicationLink, subscriptionRequired } = req.body;
-
-        // Validate required fields
-        if (!title || !department || !description || !eligibility || !applicationLink) {
-            return res.status(400).json({ 
-                message: "All fields are required",
-                required: ["title", "department", "description", "eligibility", "applicationLink"]
-            });
-        }
-
-        const newBenefit = new GovtBenefit({
-            title,
-            department,
-            description,
-            eligibility,
-            applicationLink,
-            subscriptionRequired: subscriptionRequired || false
-        });
-
-        await newBenefit.save();
-        res.status(201).json({ message: "Government benefit added", govtBenefit: newBenefit });
-    } catch (error) {
-        console.error("❌ Error adding benefit:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
-});
+router.post("/", authenticateAdmin, govtBenefitController.createGovtBenefit);
 
 
 // Admin: Update a government benefit

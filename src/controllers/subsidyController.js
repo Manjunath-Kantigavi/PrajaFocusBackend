@@ -1,30 +1,14 @@
-const GovtBenefit = require("../models/govtBenefit");
+const Subsidy = require("../models/subsidy");
 const User = require("../models/User");
 const sendWhatsAppMessage = require("../services/whatsappService");
 
-exports.createGovtBenefit = async (req, res) => {
+exports.createSubsidy = async (req, res) => {
+    const { name, department, description, moreDetailsLink } = req.body;
+
     try {
-        const { title, department, description, eligibility, applicationLink, subscriptionRequired } = req.body;
-
-        // Validate required fields
-        if (!title || !department || !description || !eligibility || !applicationLink) {
-            return res.status(400).json({ 
-                message: "All fields are required",
-                required: ["title", "department", "description", "eligibility", "applicationLink"]
-            });
-        }
-
-        const newBenefit = new GovtBenefit({
-            title,
-            department,
-            description,
-            eligibility,
-            applicationLink,
-            subscriptionRequired: subscriptionRequired || false
-        });
-
-        await newBenefit.save();
-        console.log("📝 New Government Benefit Created:", title);
+        const newSubsidy = new Subsidy({ name, department, description, moreDetailsLink });
+        await newSubsidy.save();
+        console.log("📝 New Subsidy Created:", name);
 
         // Find subscribers
         console.log("🔍 Finding subscribed users...");
@@ -41,12 +25,11 @@ exports.createGovtBenefit = async (req, res) => {
         // Send notifications
         for (const user of subscribers) {
             try {
-                const message = `🎯 *New Government Scheme Alert from PrajaFocus* 🎯\n\n` +
-                    `*${title}*\n\n` +
+                const message = `🎯 *New Subsidy Alert from PrajaFocus* 🎯\n\n` +
+                    `*${name}*\n\n` +
                     `📋 *Department:*\n${department}\n\n` +
                     `📝 *Description:*\n${description}\n\n` +
-                    `✅ *Eligibility:*\n${eligibility}\n\n` +
-                    `🔗 *How to Apply:*\n${applicationLink}\n\n` +
+                    `🔗 *More Details:*\n${moreDetailsLink}\n\n` +
                     `--------------------------------\n` +
                     `Best Regards,\n` +
                     `Team PrajaFocus 🌟\n` +
@@ -61,12 +44,12 @@ exports.createGovtBenefit = async (req, res) => {
         }
 
         res.status(201).json({ 
-            message: "Government benefit added and notifications sent", 
-            govtBenefit: newBenefit,
+            message: "Subsidy added and notifications sent", 
+            subsidy: newSubsidy,
             subscribersNotified: subscribers.length 
         });
     } catch (error) {
-        console.error("❌ Error adding benefit:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error("❌ Error adding subsidy:", error);
+        res.status(500).json({ message: "Server error", error });
     }
 };
