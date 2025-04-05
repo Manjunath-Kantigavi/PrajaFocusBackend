@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Job = require('../models/JobScheme'); // Changed from jobScheme to JobScheme
 const GovtBenefit = require('../models/govtBenefit');
 const Subsidy = require('../models/subsidy');
+const { getRevenueStats } = require('../controllers/revenueController');
 
 const router = express.Router();
 
@@ -42,6 +43,14 @@ router.get("/stats", authenticateUser, async (req, res) => {
         console.error('Error fetching stats:', error);
         res.status(500).json({ message: "Error fetching dashboard statistics" });
     }
+});
+
+// Add revenue endpoint to admin routes
+router.get("/revenue", authenticateUser, async (req, res) => {
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Access Denied. Admins only." });
+    }
+    await getRevenueStats(req, res);
 });
 
 module.exports = router;
