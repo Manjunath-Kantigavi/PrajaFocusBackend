@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./src/config/db.js"); // Import DB connection
 const app = express();
+const { handleRazorpayWebhook } = require('./src/controllers/webhookController');
 
 // Middleware
 app.use(express.json()); // Parse JSON request body
@@ -58,6 +59,8 @@ app.post('/webhook/whatsapp', express.json(), (req, res) => {
   console.log("🔔 WhatsApp Webhook Received:", req.body);
   res.sendStatus(200); // Respond to UltraMsg
 })
+// Razorpay Webhook Route
+app.post('/webhook/razorpay', express.raw({ type: 'application/json' }), handleRazorpayWebhook);
 // Start Server
 const PORT = process.env.PORT || 5008;
 app.listen(PORT, () => {
