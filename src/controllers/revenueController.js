@@ -1,8 +1,58 @@
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 
+// Add this function for development/testing
+const initializeSampleTransactions = async () => {
+    try {
+        const count = await Transaction.countDocuments();
+        if (count === 0) {
+            const sampleTransactions = [
+                {
+                    transactionId: 'TXN001',
+                    userId: '65f2d1234567890123456789', // Replace with an actual user ID
+                    userName: 'Test User 1',
+                    amount: 499,
+                    status: 'success',
+                    paymentMethod: 'razorpay',
+                    subscriptionDuration: 30,
+                    createdAt: new Date('2024-03-01')
+                },
+                {
+                    transactionId: 'TXN002',
+                    userId: '65f2d1234567890123456789',
+                    userName: 'Test User 2',
+                    amount: 899,
+                    status: 'success',
+                    paymentMethod: 'razorpay',
+                    subscriptionDuration: 90,
+                    createdAt: new Date('2024-03-10')
+                },
+                {
+                    transactionId: 'TXN003',
+                    userId: '65f2d1234567890123456789',
+                    userName: 'Test User 3',
+                    amount: 1499,
+                    status: 'success',
+                    paymentMethod: 'razorpay',
+                    subscriptionDuration: 180,
+                    createdAt: new Date('2024-03-15')
+                }
+            ];
+
+            await Transaction.insertMany(sampleTransactions);
+            console.log('✅ Sample transactions initialized');
+        }
+    } catch (error) {
+        console.error('Error initializing sample transactions:', error);
+    }
+};
+
+// Call this at the start of getRevenueStats
 exports.getRevenueStats = async (req, res) => {
     try {
+        // Initialize sample data if needed
+        await initializeSampleTransactions();
+        
         const timeFrame = req.query.timeFrame || 'all';
         let dateFilter = {};
 
