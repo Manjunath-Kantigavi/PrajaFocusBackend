@@ -32,7 +32,7 @@ router.get("/", authenticateUser, async (req, res) => {
         if (isSubscribed) {
             benefits = await GovtBenefit.find();
         } else {
-            benefits = await GovtBenefit.find({ $or: [{ subscriptionRequired: false }, { subscriptionRequired: { $exists: false } }] }).limit(5);
+            benefits = await GovtBenefit.find({ $or: [{ subscriptionRequired: false }, { subscriptionRequired: { $exists: false } }] }).limit(3);
         }
 
         return res.json(benefits);

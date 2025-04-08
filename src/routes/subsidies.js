@@ -34,7 +34,7 @@ router.get("/", authenticateUser, async (req, res) => {
         if (isSubscribed) {
             subsidies = await Subsidy.find();
         } else {
-            subsidies = await Subsidy.find().limit(1);
+            subsidies = await Subsidy.find().limit(3);
         }
 
         res.json(subsidies);

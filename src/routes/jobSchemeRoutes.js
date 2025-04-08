@@ -30,7 +30,7 @@ router.get("/", authenticateUser, async (req, res) => {
         if (isSubscribed) {
             jobSchemes = await JobScheme.find();
         } else {
-            jobSchemes = await JobScheme.find().limit(5);
+            jobSchemes = await JobScheme.find().limit(3);
         }
 
         res.json(jobSchemes);
